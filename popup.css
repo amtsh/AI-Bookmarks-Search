@@ -1,0 +1,571 @@
+:root {
+  color-scheme: light dark;
+  --bg: #f1f3f4;
+  --surface: #ffffff;
+  --surface-elevated: #ffffff;
+  --text: #1f1f1f;
+  --muted: #5f6368;
+  --line: #dadce0;
+  --accent: #0b57d0;
+  --accent-soft: #e8f0fe;
+  --on-accent: #ffffff;
+  --danger: #c5221f;
+  --shadow: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #202124;
+    --surface: #282a2c;
+    --surface-elevated: #2f3133;
+    --text: #e8eaed;
+    --muted: #9aa0a6;
+    --line: #3c4043;
+    --accent: #8ab4f8;
+    --accent-soft: rgba(138, 180, 248, 0.12);
+    --on-accent: #202124;
+    --danger: #f28b82;
+    --shadow: none;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+body.is-popup {
+  width: 380px;
+  min-width: 380px;
+  height: 560px;
+  min-height: 560px;
+  overflow: hidden;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  height: 100%;
+  padding: 10px;
+  max-width: 1080px;
+  margin: 0 auto;
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.header-link {
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.tab-button {
+  appearance: none;
+  border: 0;
+  padding: 9px 8px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.tab-button.active {
+  background: var(--surface-elevated);
+  color: var(--text);
+  font-weight: 600;
+}
+
+.tab-panel {
+  display: none;
+  flex: 1;
+  min-height: 0;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  padding: 10px;
+  overflow: hidden;
+}
+
+.tab-panel.active {
+  display: flex;
+  flex-direction: column;
+}
+
+#panel-chat {
+  min-height: 0;
+  overflow: hidden;
+  border: 0;
+  background: transparent;
+  padding: 0;
+}
+
+#panel-settings {
+  overflow-y: auto;
+}
+
+.empty-state {
+  color: var(--muted);
+  line-height: 1.45;
+  font-size: 0.92rem;
+}
+
+#panel-chat .empty-state {
+  margin: 4px 2px 8px;
+}
+
+.bookmark-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.bookmark-item {
+  display: grid;
+  grid-template-columns: 20px 1fr auto;
+  gap: 10px;
+  align-items: start;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px;
+  background: var(--surface-elevated);
+}
+
+.bookmark-item img {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+}
+
+.bookmark-title {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.3;
+}
+
+.bookmark-url {
+  margin: 3px 0 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.icon-button {
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--danger);
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.hidden {
+  display: none;
+}
+
+.chat-shell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  gap: 12px;
+}
+
+.chat-messages {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  border: 1px solid color-mix(in oklab, var(--line) 78%, transparent);
+  border-radius: 12px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--surface-elevated) 72%, transparent),
+    var(--surface)
+  );
+  font-family: inherit;
+}
+
+.chat-message {
+  max-width: min(880px, 100%);
+  border-radius: 12px;
+  padding: 10px 13px;
+  line-height: 1.4;
+  font-size: 0.9rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  white-space: pre-wrap;
+}
+
+.chat-message.user {
+  align-self: flex-end;
+  border: 1px solid color-mix(in oklab, var(--accent) 38%, var(--line));
+  background: color-mix(in oklab, var(--accent-soft) 76%, var(--surface));
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+}
+
+.chat-message.assistant {
+  align-self: flex-start;
+  border: 1px solid color-mix(in oklab, var(--line) 70%, transparent);
+  background: color-mix(in oklab, var(--surface-elevated) 90%, transparent);
+}
+
+.chat-text {
+  white-space: pre-wrap;
+}
+
+.chat-inline-link {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.chat-inline-link:hover {
+  text-decoration: underline;
+}
+
+.chat-bookmark-previews {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.chat-bookmark-card {
+  cursor: pointer;
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  gap: 8px;
+  align-items: center;
+  border: 1px solid color-mix(in oklab, var(--line) 75%, transparent);
+  border-radius: 10px;
+  padding: 8px 9px;
+  text-decoration: none;
+  color: var(--text);
+  background: var(--surface);
+  transition:
+    border-color 120ms ease,
+    background-color 120ms ease,
+    transform 120ms ease;
+}
+
+.chat-bookmark-card:hover {
+  border-color: color-mix(in oklab, var(--accent) 45%, var(--line));
+  background: color-mix(in oklab, var(--accent-soft) 32%, var(--surface));
+  transform: translateY(-1px);
+}
+
+.chat-bookmark-icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 0.66rem;
+  font-weight: 700;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.chat-bookmark-card-text {
+  min-width: 0;
+}
+
+.chat-bookmark-card-title,
+.chat-bookmark-card-url {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chat-bookmark-card-title {
+  font-size: 0.82rem;
+}
+
+.chat-bookmark-card-url {
+  font-size: 0.74rem;
+  color: var(--muted);
+}
+
+.chat-load-more {
+  margin-top: 6px;
+  align-self: flex-start;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: color-mix(in oklab, var(--accent-soft) 24%, var(--surface));
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.chat-form {
+  position: relative;
+  z-index: 30;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  border: 1px solid color-mix(in oklab, var(--line) 82%, transparent);
+  border-radius: 20px;
+  padding: 7px 9px;
+  background: var(--surface);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.chat-input-wrap {
+  min-width: 0;
+  width: 100%;
+}
+
+.chat-suggestions {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  z-index: 20;
+  overflow: visible;
+}
+
+#chat-suggestion-list {
+  margin: 0;
+  padding: 0 0 72px;
+  list-style: none;
+  max-height: 320px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.chat-suggestion-item {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  gap: 8px;
+  align-items: center;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.chat-suggestion-item:hover,
+.chat-suggestion-item.active {
+  background: color-mix(in oklab, var(--accent-soft) 42%, var(--surface));
+}
+
+.chat-suggestion-text {
+  min-width: 0;
+}
+
+.chat-suggestion-title,
+.chat-suggestion-meta {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chat-suggestion-title {
+  font-size: 0.82rem;
+}
+
+.chat-suggestion-meta {
+  font-size: 0.74rem;
+  color: var(--muted);
+}
+
+input,
+select,
+button {
+  font: inherit;
+}
+
+input,
+select {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  padding: 8px;
+}
+
+#chat-input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  padding: 4px;
+  background: transparent;
+  font-family: inherit;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+#chat-input:focus {
+  outline: none;
+}
+
+.chat-messages::-webkit-scrollbar {
+  width: 10px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+  background: color-mix(in oklab, var(--line) 75%, transparent);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+#chat-input::placeholder {
+  color: var(--muted);
+}
+
+button[type="submit"],
+.settings-form button {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.settings-form > button[type="submit"] {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 600;
+}
+
+.settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 520px;
+  min-height: 0;
+  padding-bottom: 4px;
+}
+
+.settings-credit {
+  margin: 0 0 6px;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.settings-credit a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.settings-credit a:hover {
+  text-decoration: underline;
+}
+
+.api-help-box {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: var(--surface);
+}
+
+.api-help-title {
+  margin: 0 0 8px;
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.api-help-list {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.4;
+  display: grid;
+  gap: 3px;
+}
+
+.api-help-list a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.api-help-list a:hover {
+  text-decoration: underline;
+}
+
+@media (min-width: 700px) {
+  .app {
+    padding: 20px;
+    gap: 14px;
+  }
+
+  .tab-panel {
+    padding: 16px;
+  }
+
+  .chat-message {
+    max-width: 75ch;
+  }
+}

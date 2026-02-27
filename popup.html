@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Bookmarks Search</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="app-header">
+        <h1>AI Bookmarks Search</h1>
+        <button id="open-all-bookmarks" class="header-link" type="button">All Bookmarks</button>
+      </header>
+
+      <nav class="tabs" role="tablist" aria-label="AI Bookmarks Search Tabs">
+        <button class="tab-button active" role="tab" aria-selected="true" data-tab="chat">Chat</button>
+        <button class="tab-button" role="tab" aria-selected="false" data-tab="settings">Settings</button>
+      </nav>
+
+      <section class="tab-panel active" id="panel-chat" role="tabpanel">
+        <div id="chat-missing-key" class="empty-state hidden">
+          Add an API key in Settings to start chatting.
+        </div>
+        <div class="chat-shell">
+          <div id="chat-messages" class="chat-messages"></div>
+          <div id="chat-suggestions" class="chat-suggestions hidden">
+            <ul id="chat-suggestion-list" role="listbox" aria-label="Bookmark suggestions"></ul>
+          </div>
+          <form id="chat-form" class="chat-form">
+            <div class="chat-input-wrap">
+              <input
+                id="chat-input"
+                type="text"
+                placeholder="Find bookmarks"
+                autocomplete="off"
+                role="combobox"
+                aria-autocomplete="list"
+                aria-expanded="false"
+                aria-controls="chat-suggestion-list"
+              />
+            </div>
+            <button type="submit">Send</button>
+          </form>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="panel-settings" role="tabpanel">
+        <form id="settings-form" class="settings-form">
+          <p class="settings-credit">
+            DM for feedback <a href="https://x.com/amiitshiinde" target="_blank" rel="noopener noreferrer">x.com/amiitshiinde</a> 
+          </p>
+
+          <label for="provider">AI Provider</label>
+          <select id="provider">
+            <option value="gemini">Gemini</option>
+            <option value="openai">OpenAI</option>
+            <option value="claude">Anthropic Claude</option>
+          </select>
+
+          <label for="gemini-key">Gemini API Key</label>
+          <input id="gemini-key" type="password" placeholder="Enter Gemini API key" autocomplete="off" />
+
+          <label for="openai-key">OpenAI API Key</label>
+          <input id="openai-key" type="password" placeholder="Enter OpenAI API key" autocomplete="off" />
+
+          <label for="claude-key">Claude API Key</label>
+          <input id="claude-key" type="password" placeholder="Enter Anthropic Claude API key" autocomplete="off" />
+
+          <button type="submit">Save Settings</button>
+
+          <section class="api-help-box" aria-label="How to get your Gemini API Key">
+            <p class="api-help-title">How to get your Gemini API Key</p>
+            <ol class="api-help-list">
+              <li>Visit <a href="https://aistudio.google.com/" target="_blank" rel="noopener noreferrer">Google AI Studio</a></li>
+              <li>Sign in with your Google account</li>
+              <li>Click "Get API Key" in the top menu</li>
+              <li>Click "Create API Key" button</li>
+              <li>Select or create a Google Cloud project</li>
+              <li>Copy the generated API key</li>
+              <li>Paste it in the field above</li>
+            </ol>
+          </section>
+
+          <section class="api-help-box" aria-label="How to get your OpenAI API Key">
+            <p class="api-help-title">How to get your OpenAI API Key</p>
+            <ol class="api-help-list">
+              <li>Visit <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer">OpenAI API Keys</a></li>
+              <li>Sign in to your OpenAI account</li>
+              <li>Click "Create new secret key"</li>
+              <li>Name the key and create it</li>
+              <li>Copy the generated API key</li>
+              <li>Paste it in the field above</li>
+            </ol>
+          </section>
+
+          <section class="api-help-box" aria-label="How to get your Anthropic Claude API Key">
+            <p class="api-help-title">How to get your Anthropic Claude API Key</p>
+            <ol class="api-help-list">
+              <li>Visit <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener noreferrer">Anthropic API Keys</a></li>
+              <li>Sign in to your Anthropic account</li>
+              <li>Click "Create Key"</li>
+              <li>Name the key and confirm creation</li>
+              <li>Copy the generated API key</li>
+              <li>Paste it in the field above</li>
+            </ol>
+          </section>
+        </form>
+      </section>
+    </main>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
