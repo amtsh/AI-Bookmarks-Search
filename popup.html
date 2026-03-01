@@ -9,8 +9,8 @@
   <body>
     <main class="app">
       <header class="app-header">
-        <h1>AI Bookmarks Search</h1>
-        <button id="open-all-bookmarks" class="header-link" type="button">All Bookmarks</button>
+        <h1><span class="brand-mark">✳</span> Bookmarks</h1>
+        <button id="open-all-bookmarks" class="header-link" type="button">All bookmarks</button>
       </header>
 
       <nav class="tabs" role="tablist" aria-label="AI Bookmarks Search Tabs">
@@ -32,15 +32,16 @@
               <input
                 id="chat-input"
                 type="text"
-                placeholder="Find bookmarks"
+                placeholder="Search your bookmarks"
                 autocomplete="off"
+                autofocus
                 role="combobox"
                 aria-autocomplete="list"
                 aria-expanded="false"
                 aria-controls="chat-suggestion-list"
               />
             </div>
-            <button type="submit">Send</button>
+            <button type="submit" aria-label="Send">&#8593;</button>
           </form>
         </div>
       </section>
@@ -48,7 +49,7 @@
       <section class="tab-panel" id="panel-settings" role="tabpanel">
         <form id="settings-form" class="settings-form">
           <p class="settings-credit">
-            DM for feedback <a href="https://x.com/amiitshiinde" target="_blank" rel="noopener noreferrer">x.com/amiitshiinde</a> 
+            Feedback <a href="https://x.com/amiitshiinde" target="_blank" rel="noopener noreferrer">@amiitshiinde</a>
           </p>
 
           <label for="provider">AI Provider</label>
@@ -59,54 +60,45 @@
           </select>
 
           <label for="gemini-key">Gemini API Key</label>
-          <input id="gemini-key" type="password" placeholder="Enter Gemini API key" autocomplete="off" />
+          <input id="gemini-key" type="password" placeholder="API Key" autocomplete="off" />
 
           <label for="openai-key">OpenAI API Key</label>
-          <input id="openai-key" type="password" placeholder="Enter OpenAI API key" autocomplete="off" />
+          <input id="openai-key" type="password" placeholder="API Key" autocomplete="off" />
 
           <label for="claude-key">Claude API Key</label>
-          <input id="claude-key" type="password" placeholder="Enter Anthropic Claude API key" autocomplete="off" />
+          <input id="claude-key" type="password" placeholder="API Key" autocomplete="off" />
 
-          <button type="submit">Save Settings</button>
+          <button type="submit">Save</button>
 
           <p class="settings-security-note">
-            <strong>Security Note:</strong> Your API keys are stored locally on your device using <code>chrome.storage.local</code>. They are only sent directly to the AI providers (Google, OpenAI, Anthropic) and never to a central server.
+            Keys are stored locally via <code>chrome.storage.local</code> and sent only to the AI provider you select. Never to a third-party server.
           </p>
 
           <section class="api-help-box" aria-label="How to get your Gemini API Key">
-            <p class="api-help-title">How to get your Gemini API Key</p>
+            <p class="api-help-title">Gemini API Key</p>
             <ol class="api-help-list">
               <li>Visit <a href="https://aistudio.google.com/" target="_blank" rel="noopener noreferrer">Google AI Studio</a></li>
-              <li>Sign in with your Google account</li>
-              <li>Click "Get API Key" in the top menu</li>
-              <li>Click "Create API Key" button</li>
-              <li>Select or create a Google Cloud project</li>
-              <li>Copy the generated API key</li>
-              <li>Paste it in the field above</li>
+              <li>Sign in and click "Get API Key"</li>
+              <li>Click "Create API Key", select a project</li>
+              <li>Copy and paste the key above</li>
             </ol>
           </section>
 
           <section class="api-help-box" aria-label="How to get your OpenAI API Key">
-            <p class="api-help-title">How to get your OpenAI API Key</p>
+            <p class="api-help-title">OpenAI API Key</p>
             <ol class="api-help-list">
               <li>Visit <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer">OpenAI API Keys</a></li>
-              <li>Sign in to your OpenAI account</li>
-              <li>Click "Create new secret key"</li>
-              <li>Name the key and create it</li>
-              <li>Copy the generated API key</li>
-              <li>Paste it in the field above</li>
+              <li>Sign in and click "Create new secret key"</li>
+              <li>Copy and paste the key above</li>
             </ol>
           </section>
 
           <section class="api-help-box" aria-label="How to get your Anthropic Claude API Key">
-            <p class="api-help-title">How to get your Anthropic Claude API Key</p>
+            <p class="api-help-title">Anthropic Claude API Key</p>
             <ol class="api-help-list">
-              <li>Visit <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener noreferrer">Anthropic API Keys</a></li>
-              <li>Sign in to your Anthropic account</li>
-              <li>Click "Create Key"</li>
-              <li>Name the key and confirm creation</li>
-              <li>Copy the generated API key</li>
-              <li>Paste it in the field above</li>
+              <li>Visit <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener noreferrer">Anthropic Console</a></li>
+              <li>Sign in and click "Create Key"</li>
+              <li>Copy and paste the key above</li>
             </ol>
           </section>
         </form>

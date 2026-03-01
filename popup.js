@@ -68,6 +68,7 @@ async function init() {
   await refreshBookmarksFromChrome();
   renderSettings();
   updateChatAvailability();
+  els.chatInput.focus();
 }
 
 function applyLayoutMode() {
@@ -301,18 +302,16 @@ function wireChat() {
 
     if (event.key === "ArrowDown") {
       event.preventDefault();
-      const next =
-        (state.suggestionIndex + 1 + state.inputSuggestions.length) %
-        state.inputSuggestions.length;
+      const len = state.inputSuggestions.length;
+      const next = state.suggestionIndex < 0 ? 0 : (state.suggestionIndex + 1) % len;
       setSuggestionIndex(next);
       return;
     }
 
     if (event.key === "ArrowUp") {
       event.preventDefault();
-      const next =
-        (state.suggestionIndex - 1 + state.inputSuggestions.length) %
-        state.inputSuggestions.length;
+      const len = state.inputSuggestions.length;
+      const next = state.suggestionIndex <= 0 ? len - 1 : state.suggestionIndex - 1;
       setSuggestionIndex(next);
       return;
     }
@@ -362,17 +361,24 @@ function pushMessage(role, content, options = {}) {
   const message = document.createElement("div");
   message.className = `chat-message ${role}`;
 
+  const label = document.createElement("span");
+  label.className = "chat-message-label";
+  label.textContent = role === "user" ? "You" : "AI";
+  message.append(label);
+
   if (role === "assistant") {
     const previewBookmarks = extractPreviewBookmarks(content);
     if (previewBookmarks.length > 0) {
-      // Prefer visual bookmark previews; only show text when previews are unavailable.
       renderBookmarkPreviews(message, previewBookmarks);
     } else {
       const cleanedContent = normalizeAssistantText(content, false);
       message.append(renderLinkifiedText(cleanedContent));
     }
   } else {
-    message.textContent = content;
+    const textEl = document.createElement("div");
+    textEl.className = "chat-text";
+    textEl.textContent = content;
+    message.append(textEl);
   }
 
   els.chatMessages.append(message);
@@ -465,15 +471,31 @@ function setSuggestionIndex(index) {
     return;
   }
 
+  const prev = state.suggestionIndex;
   state.suggestionIndex = Math.max(
     0,
     Math.min(index, state.inputSuggestions.length - 1),
   );
+
+  if (prev >= 0 && prev !== state.suggestionIndex) {
+    const prevEl = document.getElementById(`suggestion-${prev}`);
+    if (prevEl) {
+      prevEl.classList.remove("active");
+      prevEl.setAttribute("aria-selected", "false");
+    }
+  }
+
+  const activeEl = document.getElementById(`suggestion-${state.suggestionIndex}`);
+  if (activeEl) {
+    activeEl.classList.add("active");
+    activeEl.setAttribute("aria-selected", "true");
+    activeEl.scrollIntoView({ block: "nearest" });
+  }
+
   els.chatInput.setAttribute(
     "aria-activedescendant",
     `suggestion-${state.suggestionIndex}`,
   );
-  renderSuggestions();
 }
 
 function renderSuggestions() {
