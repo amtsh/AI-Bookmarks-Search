@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "AI Bookmarks Search",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Search and chat with your bookmarks using AI. Powered by Gemini, OpenAI, and Claude for intelligent bookmark discovery.",
   "permissions": ["storage", "bookmarks"],
   "host_permissions": [
