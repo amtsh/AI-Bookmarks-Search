@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Bookmarks Search — Find anything you've saved</title>
+    <meta name="description" content="AI-powered search for your browser bookmarks. Ask in plain English, get the right page back. Works with Gemini, OpenAI, and Claude." />
+
+    <!-- Apply saved theme before CSS renders to prevent flash -->
+    <script>
+      (function () {
+        var t = localStorage.getItem("theme");
+        if (t === "dark" || t === "light") {
+          document.documentElement.classList.add("theme-" + t);
+        }
+      }());
+    </script>
+
+    <style>
+      /* ===== Tokens: light default ===== */
+      :root {
+        --bg: #ffffff;
+        --text: #0d0d0d;
+        --muted: #666666;   /* 5.74:1 on #fff — WCAG AA */
+        --line: #e8e8e8;
+        --sub: #f5f5f5;
+      }
+
+      /* System preference — used when no manual class is set */
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0d0d0d;
+          --text: #f0f0f0;
+          --muted: #888888;  /* 5.46:1 on #0d0d0d — WCAG AA */
+          --line: #1f1f1f;
+          --sub: #161616;
+        }
+      }
+
+      /* Manual overrides — higher specificity, win over media query */
+      html.theme-light {
+        --bg: #ffffff;
+        --text: #0d0d0d;
+        --muted: #666666;
+        --line: #e8e8e8;
+        --sub: #f5f5f5;
+      }
+
+      html.theme-dark {
+        --bg: #0d0d0d;
+        --text: #f0f0f0;
+        --muted: #888888;
+        --line: #1f1f1f;
+        --sub: #161616;
+      }
+
+      /* Transitions only after first paint — avoids flash on load */
+      html.transitions-ready body {
+        transition: background-color 200ms ease, color 200ms ease;
+      }
+
+      html.transitions-ready .nav,
+      html.transitions-ready section,
+      html.transitions-ready footer,
+      html.transitions-ready .step-item,
+      html.transitions-ready .feature-item {
+        transition: border-color 200ms ease;
+      }
+
+      /* ===== Reset ===== */
+      *, *::before, *::after { box-sizing: border-box; }
+
+      html, body { margin: 0; padding: 0; }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+        font-size: 15px;
+        line-height: 1.6;
+        background: var(--bg);
+        color: var(--text);
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+      }
+
+      /* ===== Layout ===== */
+      .wrap {
+        max-width: 680px;
+        margin: 0 auto;
+        padding: 0 28px;
+      }
+
+      /* ===== Nav ===== */
+      .nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 26px 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .nav-brand {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 0.7rem;
+        font-weight: 500;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--text);
+        text-decoration: none;
+      }
+
+      .brand-mark {
+        opacity: 0.6;
+        font-size: 0.9rem;
+        line-height: 1;
+      }
+
+      .nav-right {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+      }
+
+      .theme-toggle {
+        border: 0;
+        background: transparent;
+        color: var(--muted);
+        font-size: 0.82rem;
+        line-height: 1;
+        cursor: pointer;
+        padding: 0;
+        font-family: inherit;
+        transition: color 100ms;
+        /* Prevent text-selection on double-click */
+        user-select: none;
+        -webkit-user-select: none;
+      }
+
+      .theme-toggle:hover { color: var(--text); }
+
+      .nav-cta {
+        font-size: 0.7rem;
+        color: var(--muted);
+        text-decoration: none;
+        letter-spacing: 0.03em;
+        transition: color 100ms;
+      }
+
+      .nav-cta:hover { color: var(--text); }
+
+      /* ===== Hero ===== */
+      .hero {
+        padding: 88px 0 80px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .hero-label {
+        margin: 0 0 28px;
+        font-size: 0.62rem;
+        font-weight: 500;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      .hero-headline {
+        margin: 0 0 22px;
+        font-size: clamp(2.4rem, 7vw, 3.8rem);
+        font-weight: 400;
+        line-height: 1.08;
+        letter-spacing: -0.025em;
+        color: var(--text);
+      }
+
+      .hero-sub {
+        margin: 0 0 44px;
+        font-size: 1.05rem;
+        color: var(--muted);
+        max-width: 440px;
+        line-height: 1.7;
+      }
+
+      .hero-actions {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        flex-wrap: wrap;
+      }
+
+      .btn-primary {
+        display: inline-block;
+        border: 1px solid var(--text);
+        border-radius: 4px;
+        background: var(--text);
+        color: var(--bg);
+        font-family: inherit;
+        font-size: 0.7rem;
+        font-weight: 500;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        text-decoration: none;
+        padding: 11px 22px;
+        transition: background 100ms, color 100ms, border-color 100ms;
+        white-space: nowrap;
+      }
+
+      .btn-primary:hover {
+        background: transparent;
+        color: var(--text);
+      }
+
+      .hero-note {
+        font-size: 0.72rem;
+        color: var(--muted);
+        letter-spacing: 0.01em;
+      }
+
+      /* ===== Sections ===== */
+      section {
+        padding: 64px 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .section-label {
+        margin: 0 0 32px;
+        font-size: 0.62rem;
+        font-weight: 500;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      /* ===== Steps ===== */
+      .step-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      .step-item {
+        display: grid;
+        grid-template-columns: 28px 1fr;
+        gap: 20px;
+        align-items: baseline;
+        padding: 16px 0;
+        border-top: 1px solid var(--line);
+      }
+
+      .step-item:first-child { border-top: 0; padding-top: 0; }
+
+      .step-num {
+        font-size: 0.62rem;
+        font-weight: 500;
+        letter-spacing: 0.06em;
+        color: var(--muted);
+        padding-top: 2px;
+      }
+
+      .step-text {
+        margin: 0;
+        font-size: 0.92rem;
+        color: var(--text);
+        line-height: 1.6;
+      }
+
+      .step-text em {
+        font-style: normal;
+        color: var(--muted);
+      }
+
+      /* ===== Features ===== */
+      .feature-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      .feature-item {
+        padding: 20px 0;
+        border-top: 1px solid var(--line);
+      }
+
+      .feature-item:first-child { border-top: 0; padding-top: 0; }
+
+      .feature-title {
+        margin: 0 0 5px;
+        font-size: 0.92rem;
+        font-weight: 500;
+        color: var(--text);
+      }
+
+      .feature-desc {
+        margin: 0;
+        font-size: 0.84rem;
+        color: var(--muted);
+        line-height: 1.65;
+        max-width: 520px;
+      }
+
+      /* ===== Privacy ===== */
+      .privacy-text {
+        margin: 0;
+        font-size: 0.88rem;
+        color: var(--muted);
+        line-height: 1.75;
+        max-width: 560px;
+      }
+
+      .privacy-text code {
+        font-family: "SF Mono", "Cascadia Mono", "Fira Mono", Menlo, monospace;
+        font-size: 0.78rem;
+        color: var(--text);
+      }
+
+      /* ===== Footer ===== */
+      footer {
+        padding: 64px 0 56px;
+      }
+
+      .footer-mark {
+        display: block;
+        font-size: 1.5rem;
+        margin-bottom: 18px;
+        opacity: 0.45;
+        line-height: 1;
+      }
+
+      .footer-tagline {
+        margin: 0 0 5px;
+        font-size: 0.95rem;
+        font-style: italic;
+        color: var(--text);
+      }
+
+      .footer-sub {
+        margin: 0 0 32px;
+        font-size: 0.82rem;
+        color: var(--muted);
+        line-height: 1.6;
+        max-width: 400px;
+      }
+
+      .footer-meta {
+        font-size: 0.7rem;
+        color: var(--muted);
+        letter-spacing: 0.01em;
+      }
+
+      .footer-meta a {
+        color: var(--muted);
+        text-decoration: underline;
+        text-decoration-color: var(--line);
+        text-underline-offset: 2px;
+        transition: color 100ms, text-decoration-color 100ms;
+      }
+
+      .footer-meta a:hover {
+        color: var(--text);
+        text-decoration-color: var(--text);
+      }
+
+      /* ===== Responsive ===== */
+      @media (max-width: 480px) {
+        .wrap { padding: 0 20px; }
+        .hero { padding: 64px 0 60px; }
+        section { padding: 52px 0; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+
+      <nav class="nav">
+        <a class="nav-brand" href="/">
+          <span class="brand-mark">✳</span> Bookmarks
+        </a>
+        <div class="nav-right">
+          <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to dark mode">◐</button>
+          <a class="nav-cta" href="#install">Add to Chrome &rarr;</a>
+        </div>
+      </nav>
+
+      <section class="hero">
+        <p class="hero-label">Chrome Extension &middot; Free</p>
+        <h1 class="hero-headline">Find anything<br>you&rsquo;ve saved.</h1>
+        <p class="hero-sub">AI-powered search for your browser bookmarks. Ask in plain English, get the right page back.</p>
+        <div class="hero-actions">
+          <a class="btn-primary" id="install" href="https://chromewebstore.google.com/" target="_blank" rel="noopener noreferrer">Add to Chrome</a>
+          <span class="hero-note">Free &middot; Bring your own API key</span>
+        </div>
+      </section>
+
+      <section>
+        <p class="section-label">How it works</p>
+        <ol class="step-list">
+          <li class="step-item">
+            <span class="step-num">01</span>
+            <p class="step-text">Install the extension and click the icon in your toolbar.</p>
+          </li>
+          <li class="step-item">
+            <span class="step-num">02</span>
+            <p class="step-text">Add an API key. <em>Gemini, OpenAI, or Anthropic Claude &mdash; your choice.</em></p>
+          </li>
+          <li class="step-item">
+            <span class="step-num">03</span>
+            <p class="step-text">Type what you&rsquo;re looking for in plain English.</p>
+          </li>
+          <li class="step-item">
+            <span class="step-num">04</span>
+            <p class="step-text">Get back the exact bookmark you were thinking of.</p>
+          </li>
+        </ol>
+      </section>
+
+      <section>
+        <p class="section-label">What it does</p>
+        <ul class="feature-list">
+          <li class="feature-item">
+            <p class="feature-title">Natural language search</p>
+            <p class="feature-desc">Type &ldquo;that React performance article from last year&rdquo; and it finds it &mdash; not just keyword matching, but actual understanding of what you mean.</p>
+          </li>
+          <li class="feature-item">
+            <p class="feature-title">Works with your existing bookmarks</p>
+            <p class="feature-desc">No importing, no syncing, no new folder structure required. Uses the bookmarks already saved in your browser.</p>
+          </li>
+          <li class="feature-item">
+            <p class="feature-title">Instant suggestions as you type</p>
+            <p class="feature-desc">Matching bookmarks surface immediately while you type, before the AI response even arrives.</p>
+          </li>
+          <li class="feature-item">
+            <p class="feature-title">Your choice of AI model</p>
+            <p class="feature-desc">Gemini, OpenAI, or Claude. Bring your own API key and switch providers any time from settings.</p>
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <p class="section-label">Privacy</p>
+        <p class="privacy-text">
+          Your API keys are stored locally on your device using <code>chrome.storage.local</code>.
+          Queries are sent directly to the AI provider you select &mdash; Google, OpenAI, or Anthropic.
+          Nothing passes through a third-party server. Your bookmarks never leave your browser.
+        </p>
+      </section>
+
+      <footer>
+        <span class="footer-mark">✳</span>
+        <p class="footer-tagline">Find anything you&rsquo;ve saved.</p>
+        <p class="footer-sub">AI Bookmarks Search for Chrome. Updated regularly.</p>
+        <p class="footer-meta">
+          Built by <a href="https://x.com/amiitshiinde" target="_blank" rel="noopener noreferrer">@amiitshiinde</a>
+        </p>
+      </footer>
+
+    </div>
+
+    <script>
+      (function () {
+        var btn = document.getElementById("theme-toggle");
+        var html = document.documentElement;
+
+        function effectiveTheme() {
+          if (html.classList.contains("theme-dark")) return "dark";
+          if (html.classList.contains("theme-light")) return "light";
+          return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        }
+
+        function setTheme(theme) {
+          html.classList.remove("theme-dark", "theme-light");
+          html.classList.add("theme-" + theme);
+          localStorage.setItem("theme", theme);
+          btn.setAttribute(
+            "aria-label",
+            theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
+          );
+        }
+
+        // Sync aria-label to actual current state on load
+        btn.setAttribute(
+          "aria-label",
+          effectiveTheme() === "dark" ? "Switch to light mode" : "Switch to dark mode"
+        );
+
+        btn.addEventListener("click", function () {
+          setTheme(effectiveTheme() === "dark" ? "light" : "dark");
+        });
+
+        // Enable transitions only after the first frame — prevents
+        // background-color transition from firing on initial page load
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () {
+            html.classList.add("transitions-ready");
+          });
+        });
+      }());
+    </script>
+  </body>
+</html>
