@@ -9,8 +9,8 @@ const BOOKMARK_CONTEXT_MAX = 100;
 const CHAT_HISTORY_MAX_MESSAGES = 6;
 const MAX_RESPONSE_TOKENS = 512;
 const INPUT_SUGGESTION_MAX = 5;
-const OPENAI_MODEL = "gpt-4.1-nano";
-const CLAUDE_MODEL = "claude-haiku-4-5-latest";
+const OPENAI_MODEL = "gpt-4o-mini";
+const CLAUDE_MODEL = "claude-3-5-haiku-latest";
 
 const state = {
   bookmarks: [],
@@ -141,11 +141,16 @@ function flattenBookmarkTree(rootNode) {
     if (!node) continue;
 
     if (node.url) {
+      const site = siteLabel(node.url);
       bookmarks.push({
         id: node.id,
         title: node.title || node.url,
         url: node.url,
         savedAt: new Date(node.dateAdded || Date.now()).toISOString(),
+        // Pre-calculate search-critical fields for performance in large libraries.
+        _site: site.toLowerCase(),
+        _titleNormalized: normalizeForMatch(node.title || node.url),
+        _urlNormalized: (node.url || "").toLowerCase(),
       });
     }
 
@@ -214,6 +219,18 @@ function renderBookmarks() {
   // Bookmark tab UI removed; keep function for state-sync call sites.
 }
 
+function debounce(fn, wait) {
+  let timer;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn.apply(this, args), wait);
+  };
+}
+
+const debouncedUpdateSuggestions = debounce((val) => {
+  updateSuggestions(val);
+}, 120);
+
 function wireChat() {
   els.chatMessages.addEventListener("click", async (event) => {
     const target = event.target;
@@ -261,7 +278,7 @@ function wireChat() {
   });
 
   els.chatInput.addEventListener("input", () => {
-    updateSuggestions(els.chatInput.value);
+    debouncedUpdateSuggestions(els.chatInput.value);
   });
 
   els.chatInput.addEventListener("focus", () => {
@@ -390,9 +407,9 @@ function selectInputSuggestions(query, limit) {
 
   const scored = state.bookmarks
     .map((bookmark) => {
-      const title = String(bookmark.title || "").toLowerCase();
-      const host = siteLabel(bookmark.url).toLowerCase();
-      const url = String(bookmark.url || "").toLowerCase();
+      const title = bookmark._titleNormalized;
+      const host = bookmark._site;
+      const url = bookmark._urlNormalized;
 
       const inTitle = title.includes(q);
       const inHost = host.includes(q);
@@ -595,7 +612,7 @@ function extractPreviewBookmarks(content) {
     const normalized = normalizeUrl(url);
     const bookmark =
       state.bookmarks.find((item) => normalizeUrl(item.url) === normalized) ||
-      state.bookmarks.find((item) => siteLabel(item.url) === siteLabel(url));
+      state.bookmarks.find((item) => item._site === siteLabel(url).toLowerCase());
     if (bookmark) {
       byId.set(bookmark.id, bookmark);
       return;
@@ -610,9 +627,9 @@ function extractPreviewBookmarks(content) {
   });
 
   domainMentions.forEach((mention) => {
-    const mentionHost = siteLabel(mention.split("/")[0]);
+    const mentionHost = siteLabel(mention.split("/")[0]).toLowerCase();
     const bookmark = state.bookmarks.find(
-      (item) => siteLabel(item.url) === mentionHost,
+      (item) => item._site === mentionHost,
     );
     if (bookmark) {
       byId.set(bookmark.id, bookmark);
@@ -634,18 +651,15 @@ function extractTitleMentions(content) {
 
   const matches = [];
   for (const bookmark of state.bookmarks) {
-    const title = String(bookmark.title || "").trim();
+    const title = bookmark._titleNormalized;
     if (title.length < 4) continue;
 
-    const normalizedTitle = normalizeForMatch(title);
-    if (normalizedTitle.length < 4) continue;
-
-    if (normalizedContent.includes(normalizedTitle)) {
+    if (normalizedContent.includes(title)) {
       matches.push(bookmark);
       continue;
     }
 
-    const prefix = normalizedTitle.split(" ").slice(0, 4).join(" ").trim();
+    const prefix = title.split(" ").slice(0, 4).join(" ").trim();
     if (prefix.length >= 10 && normalizedContent.includes(prefix)) {
       matches.push(bookmark);
     }
@@ -854,16 +868,14 @@ function selectRelevantBookmarks(input, maxCount) {
   const normalizedInput = normalizeForMatch(input);
   const tokens = extractQueryTokens(input);
   const domains = extractDomainCandidates(input).map((d) =>
-    siteLabel(d.split("/")[0]),
+    siteLabel(d.split("/")[0]).toLowerCase(),
   );
   const wantsRecent = /\b(recent|latest|newest|last)\b/.test(normalizedInput);
 
   const scored = state.bookmarks.map((bookmark) => {
-    const titleWords = tokenizeSearchText(bookmark.title);
-    const urlWords = tokenizeSearchText(bookmark.url);
-    const allWords = [...titleWords, ...urlWords];
-    const normalizedTitle = normalizeForMatch(bookmark.title);
-    const host = siteLabel(bookmark.url);
+    const allWords = tokenizeSearchText(`${bookmark.title} ${bookmark.url}`);
+    const normalizedTitle = bookmark._titleNormalized;
+    const host = bookmark._site;
     let score = 0;
     let domainHit = false;
     let tokenHitCount = 0;
@@ -878,7 +890,8 @@ function selectRelevantBookmarks(input, maxCount) {
     tokens.forEach((token) => {
       if (tokenMatchesWord(token, allWords)) {
         tokenHitCount += 1;
-        const inTitle = tokenMatchesWord(token, titleWords);
+        // Higher score if token appears in title
+        const inTitle = bookmark._titleNormalized.includes(token);
         score += inTitle ? 8 : 4;
       } else if (normalizedTitle.includes(token)) {
         tokenHitCount += 1;
@@ -1126,46 +1139,29 @@ function hasAnyProviderKey() {
 }
 
 async function requestOpenAI(systemPrompt, userInput) {
-  const body = {
-    model: OPENAI_MODEL,
-    max_output_tokens: MAX_RESPONSE_TOKENS,
-    temperature: 0.2,
-    input: userInput,
-  };
+  const { recentMessages } = buildConversationWindow();
+  const messages = [
+    { role: "system", content: systemPrompt },
+    ...recentMessages.map((msg) => ({
+      role: msg.role === "assistant" ? "assistant" : "user",
+      content: msg.content,
+    })),
+    { role: "user", content: userInput },
+  ];
 
-  if (state.openaiResponseId) {
-    body.previous_response_id = state.openaiResponseId;
-  } else {
-    body.instructions = systemPrompt;
-  }
-
-  const headers = {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${state.settings.openaiKey}`,
-  };
-
-  let response = await fetch("https://api.openai.com/v1/responses", {
+  const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
-    headers,
-    body: JSON.stringify(body),
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${state.settings.openaiKey}`,
+    },
+    body: JSON.stringify({
+      model: OPENAI_MODEL,
+      messages,
+      max_tokens: MAX_RESPONSE_TOKENS,
+      temperature: 0.2,
+    }),
   });
-
-  // If chaining failed (expired/invalid response ID), retry with full context.
-  if (
-    !response.ok &&
-    state.openaiResponseId &&
-    response.status !== 429 &&
-    response.status < 500
-  ) {
-    state.openaiResponseId = null;
-    delete body.previous_response_id;
-    body.instructions = systemPrompt;
-    response = await fetch("https://api.openai.com/v1/responses", {
-      method: "POST",
-      headers,
-      body: JSON.stringify(body),
-    });
-  }
 
   if (!response.ok) {
     const err = await safeJson(response);
@@ -1177,11 +1173,7 @@ async function requestOpenAI(systemPrompt, userInput) {
   }
 
   const data = await response.json();
-  state.openaiResponseId = data.id || null;
-  const output = data.output?.find((item) => item.type === "message");
-  const text = output?.content
-    ?.find((c) => c.type === "output_text")
-    ?.text?.trim();
+  const text = data.choices?.[0]?.message?.content?.trim();
   return text || "No response.";
 }
 

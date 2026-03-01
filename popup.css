@@ -523,6 +523,23 @@ button[type="submit"],
   text-decoration: underline;
 }
 
+.settings-security-note {
+  margin: 12px 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+  line-height: 1.4;
+  padding: 10px;
+  border-radius: 8px;
+  background: color-mix(in oklab, var(--accent-soft) 22%, var(--surface));
+  border: 1px solid color-mix(in oklab, var(--line) 70%, transparent);
+}
+
+.settings-security-note code {
+  background: color-mix(in oklab, var(--muted) 12%, transparent);
+  padding: 1px 3px;
+  border-radius: 4px;
+}
+
 .api-help-box {
   border: 1px solid var(--line);
   border-radius: 8px;
