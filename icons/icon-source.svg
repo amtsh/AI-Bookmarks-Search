@@ -1,37 +1,19 @@
 <svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-  <title>AI Bookmarks Search Icon</title>
-  <g>
-    <circle cx="100" cy="100" r="80" fill="#EEF4FA" stroke="#F8FAFC" stroke-width="20" />
-    <circle cx="100" cy="100" r="80" fill="none" stroke="#1F2937" stroke-width="12" />
-  </g>
-  <g>
-    <text
-      x="100"
-      y="100"
-      font-family="Arial, sans-serif"
-      font-size="110"
-      font-weight="900"
-      fill="#111827"
-      stroke="#F8FAFC"
-      stroke-width="10"
-      paint-order="stroke fill"
-      text-anchor="middle"
-      dominant-baseline="middle"
-    >
-      B
-    </text>
-  </g>
+  <title>AI Bookmarks Search</title>
+
+  <!-- Background: dark rounded square -->
+  <rect width="200" height="200" rx="44" ry="44" fill="#111111"/>
+
+  <!-- Bookmark ribbon: centered, clean V-notch at bottom -->
   <path
-    d="M156 14 L164 36 L186 44 L164 52 L156 74 L148 52 L126 44 L148 36 Z"
-    fill="#FACC15"
-    stroke="#FFFFFF"
-    stroke-width="4"
-    paint-order="stroke fill"
+    d="M76 34 L124 34 Q134 34 134 44 L134 166 L100 142 L66 166 L66 44 Q66 34 76 34 Z"
+    fill="#ffffff"
   />
+
+  <!-- AI sparkle (4-pointed star) cut from bookmark in negative space -->
+  <!-- Center (100, 74), cardinal arm R=11, diagonal waist r=3 -->
   <path
-    d="M156 14 L164 36 L186 44 L164 52 L156 74 L148 52 L126 44 L148 36 Z"
-    fill="none"
-    stroke="#1F2937"
-    stroke-width="1.5"
+    d="M100 63 L102 71 L111 74 L102 77 L100 85 L98 77 L89 74 L98 71 Z"
+    fill="#111111"
   />
 </svg>

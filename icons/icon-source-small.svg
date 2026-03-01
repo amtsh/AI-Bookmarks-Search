@@ -1,35 +1,19 @@
 <svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-  <title>AI Bookmarks Search Icon (Small)</title>
-  <circle cx="100" cy="100" r="80" fill="#EEF4FA" stroke="#F8FAFC" stroke-width="18" />
-  <circle cx="100" cy="100" r="80" fill="none" stroke="#1F2937" stroke-width="14" />
+  <title>AI Bookmarks Search (Small)</title>
 
-  <text
-    x="100"
-    y="100"
-    font-family="Arial, sans-serif"
-    font-size="122"
-    font-weight="900"
-    fill="#111827"
-    stroke="#F8FAFC"
-    stroke-width="9"
-    paint-order="stroke fill"
-    text-anchor="middle"
-    dominant-baseline="middle"
-  >
-    B
-  </text>
+  <!-- Background -->
+  <rect width="200" height="200" rx="44" ry="44" fill="#111111"/>
 
+  <!-- Bookmark ribbon: slightly wider for better legibility at small sizes,
+       V-notch is shallower so it remains visible at 16px -->
   <path
-    d="M158 24 L164 38 L178 44 L164 50 L158 64 L152 50 L138 44 L152 38 Z"
-    fill="#FACC15"
-    stroke="#F8FAFC"
-    stroke-width="4"
-    paint-order="stroke fill"
+    d="M74 36 L126 36 Q136 36 136 46 L136 164 L100 144 L64 164 L64 46 Q64 36 74 36 Z"
+    fill="#ffffff"
   />
+
+  <!-- Sparkle: slightly smaller (R=9) so it doesn't overpower at small sizes -->
   <path
-    d="M158 24 L164 38 L178 44 L164 50 L158 64 L152 50 L138 44 L152 38 Z"
-    fill="none"
-    stroke="#1F2937"
-    stroke-width="1.75"
+    d="M100 65 L101.8 72.2 L109 74 L101.8 75.8 L100 83 L98.2 75.8 L91 74 L98.2 72.2 Z"
+    fill="#111111"
   />
 </svg>
